@@ -97,6 +97,88 @@
 
 /***/ }),
 
+/***/ "./src/js/Barres.js":
+/*!**************************!*\
+  !*** ./src/js/Barres.js ***!
+  \**************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Barres; });
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Barres = /*#__PURE__*/function () {
+  function Barres(game) {
+    _classCallCheck(this, Barres);
+
+    this.game = game;
+    this.spaceBetweenBarres = 100;
+    this.x = game.canvas.width;
+    this.maxOffset = 0;
+    this.width = 230;
+    this.height = 23;
+    this.right = -Math.floor(Math.random() * 280) - 25;
+    this.left = this.right + this.width + this.spaceBetweenBarres;
+    this.barresRightFrame = {
+      sx: 647,
+      sy: 1881,
+      sw: this.width,
+      sh: this.height,
+      dx: this.right,
+      dy: 50,
+      dw: this.width,
+      dh: this.height
+    };
+    this.barresLeftFrame = {
+      sx: 647,
+      sy: 1881,
+      sw: this.width,
+      sh: this.height,
+      dx: this.left,
+      dy: 50,
+      dw: this.width,
+      dh: this.height
+    };
+    this.speed = 1;
+  }
+
+  _createClass(Barres, [{
+    key: "update",
+    value: function update() {
+      if (this.barresRightFrame.dy <= this.maxOffset) {
+        this.barresRightFrame.dy = 0;
+      }
+
+      this.barresRightFrame.dy += this.speed;
+
+      if (this.barresLeftFrame.dy <= this.maxOffset) {
+        this.barresLeftFrame.dy = 0;
+      }
+
+      this.barresLeftFrame.dy += this.speed;
+      this.render();
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      this.game.renderSpriteFrame(this.barresRightFrame);
+      this.game.renderSpriteFrame(this.barresLeftFrame);
+    }
+  }]);
+
+  return Barres;
+}();
+
+
+
+/***/ }),
+
 /***/ "./src/js/Nuages.js":
 /*!**************************!*\
   !*** ./src/js/Nuages.js ***!
@@ -271,12 +353,12 @@ var bg = {
     console.log(this.y);
   },
   goRight: function goRight() {
-    this.x += 5;
+    this.x += 9;
     this.render();
     console.log(this.x);
   },
   goLeft: function goLeft() {
-    this.x -= 5;
+    this.x -= 9;
     this.render();
     console.log(this.x);
   }
@@ -363,6 +445,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _bg__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./bg */ "./src/js/bg.js");
 /* harmony import */ var _gameController__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./gameController */ "./src/js/gameController.js");
 /* harmony import */ var _Nuages__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./Nuages */ "./src/js/Nuages.js");
+/* harmony import */ var _Barres__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./Barres */ "./src/js/Barres.js");
+
 
 
 
@@ -375,8 +459,11 @@ var game = {
   sprite: new Image(),
   nuages: [],
   maxNuages: 3,
+  barres: [],
+  maxBarres: 5,
   frameCounter: 0,
   frameInterval: 80,
+  requestId: 0,
   init: function init() {
     var _this = this;
 
@@ -394,18 +481,23 @@ var game = {
   animate: function animate() {
     var _this2 = this;
 
-    window.requestAnimationFrame(function () {
+    this.requestId = window.requestAnimationFrame(function () {
       _this2.animate();
     });
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     _background__WEBPACK_IMPORTED_MODULE_1__["default"].update();
 
     if (this.frameCounter++ > this.frameInterval) {
+      if (this.barres.length >= this.maxBarres) this.barres.splice(0, 1);
+      this.barres.push(new _Barres__WEBPACK_IMPORTED_MODULE_5__["default"](this));
       if (this.nuages.length >= this.maxNuages) this.nuages.splice(0, 1);
       this.nuages.push(new _Nuages__WEBPACK_IMPORTED_MODULE_4__["default"](this));
       this.frameCounter = 0;
     }
 
+    this.barres.forEach(function (barre) {
+      barre.update();
+    });
     this.nuages.forEach(function (nuage) {
       nuage.update();
     });
@@ -414,6 +506,9 @@ var game = {
   },
   renderSpriteFrame: function renderSpriteFrame(coordinates) {
     this.context.drawImage(this.sprite, coordinates.sx, coordinates.sy, coordinates.sw, coordinates.sh, coordinates.dx, coordinates.dy, coordinates.dw, coordinates.dh);
+  },
+  cancelAnimation: function cancelAnimation() {
+    window.cancelAnimationFrame(this.requestId);
   }
 };
 game.init();

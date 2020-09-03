@@ -59,15 +59,17 @@ const bg = {
         console.log(this.y)
     },
     goRight() {
-        this.x += 5
+        this.x += 9
         this.render()
         console.log(this.x)
     },
     goLeft() {
-        this.x -= 5
+        this.x -= 9
         this.render()
         console.log(this.x)
-    }
+    },
+
+
 
 
 }
