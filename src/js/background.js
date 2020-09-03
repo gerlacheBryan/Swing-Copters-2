@@ -10,10 +10,14 @@ const background = {
         dw: 0,
         dh: 0,
     },
-    x: 0,
-    y: 0,
+    speed: 3,
+    maxOffset: 0,
 
     update() {
+        if (this.frame.dy <= this.maxOffset){
+            this.frame.dy = 0
+        }
+        this.frame.dy += this.speed
         this.game.renderSpriteFrame(this.frame)
 
     },

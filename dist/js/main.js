@@ -97,6 +97,64 @@
 
 /***/ }),
 
+/***/ "./src/js/Nuages.js":
+/*!**************************!*\
+  !*** ./src/js/Nuages.js ***!
+  \**************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Nuages; });
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Nuages = /*#__PURE__*/function () {
+  function Nuages(game) {
+    _classCallCheck(this, Nuages);
+
+    this.game = game;
+    this.nuagesFrame = {
+      sx: 647,
+      sy: 3,
+      sw: 227,
+      sh: 197,
+      dx: 0,
+      dy: 0,
+      dw: 227,
+      dh: 197
+    };
+    this.maxOffset = 0, this.speed = 3;
+  }
+
+  _createClass(Nuages, [{
+    key: "update",
+    value: function update() {
+      if (this.nuagesFrame.dy <= this.maxOffset) {
+        this.nuagesFrame.dy = 0;
+      }
+
+      this.nuagesFrame.dy += this.speed;
+      this.render();
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      this.game.renderSpriteFrame(this.nuagesFrame);
+    }
+  }]);
+
+  return Nuages;
+}();
+
+
+
+/***/ }),
+
 /***/ "./src/js/background.js":
 /*!******************************!*\
   !*** ./src/js/background.js ***!
@@ -118,9 +176,14 @@ var background = {
     dw: 0,
     dh: 0
   },
-  x: 0,
-  y: 0,
+  speed: 3,
+  maxOffset: 0,
   update: function update() {
+    if (this.frame.dy <= this.maxOffset) {
+      this.frame.dy = 0;
+    }
+
+    this.frame.dy += this.speed;
     this.game.renderSpriteFrame(this.frame);
   },
   init: function init(game) {
@@ -171,13 +234,17 @@ var bg = {
   counterInterval: 0,
   maxInterval: 10,
   width: 33,
-  height: 23,
-  update: function update() {
-    this.render();
-  },
+  height: 32,
+  y: 450,
+  x: 130,
+  upSpeed: 0,
+  maxUpSpeed: 7,
   init: function init(game) {
     this.game = game;
     this.maxAnimationStep = this.frames.length - 1;
+  },
+  update: function update() {
+    this.render();
   },
   render: function render() {
     this.counterInterval++;
@@ -192,14 +259,61 @@ var bg = {
       sy: this.frames[this.animationStep].sy,
       sw: this.width,
       sh: this.height,
-      dx: 130,
-      dy: 430,
+      dx: this.x,
+      dy: this.y,
       dw: this.width,
       dh: this.height
     });
+  },
+  goUp: function goUp() {
+    this.y = this.game.canvas.height / 2;
+    this.render();
+    console.log(this.y);
+  },
+  goRight: function goRight() {
+    this.x += 5;
+    this.render();
+    console.log(this.x);
+  },
+  goLeft: function goLeft() {
+    this.x -= 5;
+    this.render();
+    console.log(this.x);
   }
 };
 /* harmony default export */ __webpack_exports__["default"] = (bg);
+
+/***/ }),
+
+/***/ "./src/js/gameController.js":
+/*!**********************************!*\
+  !*** ./src/js/gameController.js ***!
+  \**********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _bg__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./bg */ "./src/js/bg.js");
+
+var gameController = {
+  init: function init(game) {
+    window.addEventListener('keydown', function (e) {
+      if (e.key === 'z') {
+        _bg__WEBPACK_IMPORTED_MODULE_0__["default"].goUp();
+      }
+
+      if (e.key === 'a') {
+        _bg__WEBPACK_IMPORTED_MODULE_0__["default"].goRight();
+      }
+
+      if (e.key === 'e') {
+        _bg__WEBPACK_IMPORTED_MODULE_0__["default"].goLeft();
+      }
+    });
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = (gameController);
 
 /***/ }),
 
@@ -247,6 +361,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ground__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ground */ "./src/js/ground.js");
 /* harmony import */ var _background__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./background */ "./src/js/background.js");
 /* harmony import */ var _bg__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./bg */ "./src/js/bg.js");
+/* harmony import */ var _gameController__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./gameController */ "./src/js/gameController.js");
+/* harmony import */ var _Nuages__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./Nuages */ "./src/js/Nuages.js");
+
+
 
 
 
@@ -255,17 +373,23 @@ var game = {
   context: null,
   spriteSheetSrc: './resources/sprite.png',
   sprite: new Image(),
+  nuages: [],
+  maxNuages: 3,
+  frameCounter: 0,
+  frameInterval: 80,
   init: function init() {
     var _this = this;
 
     this.context = this.canvas.getContext('2d');
     this.sprite.src = this.spriteSheetSrc;
     this.sprite.addEventListener('load', function () {
+      _gameController__WEBPACK_IMPORTED_MODULE_3__["default"].init(_this);
       _background__WEBPACK_IMPORTED_MODULE_1__["default"].init(_this);
       _ground__WEBPACK_IMPORTED_MODULE_0__["default"].init(_this);
       _bg__WEBPACK_IMPORTED_MODULE_2__["default"].init(_this);
+
+      _this.animate();
     });
-    this.animate();
   },
   animate: function animate() {
     var _this2 = this;
@@ -274,8 +398,18 @@ var game = {
       _this2.animate();
     });
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    _ground__WEBPACK_IMPORTED_MODULE_0__["default"].update();
     _background__WEBPACK_IMPORTED_MODULE_1__["default"].update();
+
+    if (this.frameCounter++ > this.frameInterval) {
+      if (this.nuages.length >= this.maxNuages) this.nuages.splice(0, 1);
+      this.nuages.push(new _Nuages__WEBPACK_IMPORTED_MODULE_4__["default"](this));
+      this.frameCounter = 0;
+    }
+
+    this.nuages.forEach(function (nuage) {
+      nuage.update();
+    });
+    _ground__WEBPACK_IMPORTED_MODULE_0__["default"].update();
     _bg__WEBPACK_IMPORTED_MODULE_2__["default"].update();
   },
   renderSpriteFrame: function renderSpriteFrame(coordinates) {

@@ -15,19 +15,24 @@ const bg = {
     counterInterval: 0,
     maxInterval: 10,
     width: 33,
-    height: 23,
+    height: 32,
+    y: 450,
+    x: 130,
+    upSpeed: 0,
+    maxUpSpeed: 7,
 
-
-    update() {
-        this.render()
-    },
 
     init(game) {
         this.game = game
         this.maxAnimationStep = this.frames.length - 1
     },
 
-    render(){
+    update() {
+        this.render()
+    },
+
+    render() {
+
         this.counterInterval++
         if (!(this.counterInterval % this.maxInterval)) {
             this.counterInterval = 0
@@ -35,18 +40,36 @@ const bg = {
         }
         this.game.renderSpriteFrame(
             {
-            sx: this.frames[this.animationStep].sx,
-            sy: this.frames[this.animationStep].sy,
-            sw: this.width,
-            sh: this.height,
-            dx: 130,
-            dy: 430,
-            dw: this.width,
-            dh: this.height,
-        }
+                sx: this.frames[this.animationStep].sx,
+                sy: this.frames[this.animationStep].sy,
+                sw: this.width,
+                sh: this.height,
+                dx: this.x,
+                dy: this.y,
+                dw: this.width,
+                dh: this.height,
+            }
         )
 
+    },
+
+    goUp() {
+        this.y = this.game.canvas.height / 2
+        this.render()
+        console.log(this.y)
+    },
+    goRight() {
+        this.x += 5
+        this.render()
+        console.log(this.x)
+    },
+    goLeft() {
+        this.x -= 5
+        this.render()
+        console.log(this.x)
     }
+
+
 }
 
 export default bg
